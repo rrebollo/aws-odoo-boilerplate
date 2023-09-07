@@ -1,0 +1,5 @@
+pathlib
+qrcode
+astor
+pdf417gen
+web-pdb

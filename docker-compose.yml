@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  odoo:
+    image: ${IMAGE}:${TAG}
+    build: 
+      context: ./odoo/
+      network: host
+    command: ['odoo', '--dev=xml,reload']
+    expose:
+      - "8069"
+      - "8072"
+    ports:
+      - "${WEB_PDB_PORT}:5555"
+    volumes:
+      - "odoo_data:/odoo/data"      
+      - "${CUSTOM_ADDONS_PATH}:/odoo/external-src/custom" 
+    env_file: .env
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+      - kwkhtmltopdf   
+    networks:
+      - db_net
+ 
+  kwkhtmltopdf:
+    image: ghcr.io/acsone/kwkhtmltopdf:0.12.5-latest
+    networks:
+      - db_net
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+    volumes:
+      - "db_data:/var/lib/postgresql/data"
+    networks:
+      - db_net
+
+volumes:
+  odoo_data:
+  db_data:
+
+networks:
+  db_net:
